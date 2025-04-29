@@ -1,10 +1,10 @@
-import Profile from '@/components/Main/Profile';
+import Settings from '@/components/Main/Settings';
 import WorkspaceLayout from '@/components/Layout/WorkspaceLayout';
 
-export default function ProfilePage() {
+export default function SettingsPage() {
   return (
     <WorkspaceLayout>
-      <Profile />
+      <Settings />
     </WorkspaceLayout>
   );
 }

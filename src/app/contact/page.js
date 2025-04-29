@@ -1,10 +1,10 @@
-import Profile from '@/components/Main/Profile';
+import Contact from '@/components/Main/Contact';
 import WorkspaceLayout from '@/components/Layout/WorkspaceLayout';
 
-export default function ProfilePage() {
+export default function ContactPage() {
   return (
     <WorkspaceLayout>
-      <Profile />
+      <Contact />
     </WorkspaceLayout>
   );
 }

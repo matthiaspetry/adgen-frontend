@@ -15,50 +15,56 @@ export default function Register() {
     event.preventDefault();
     setMessage('');
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-       options: {
-        emailRedirectTo: `${window.location.origin}/login`,       
-      }
-    });
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        }
+      });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      // Handle different registration response scenarios
+      if (!data.user || !data.user.identities?.length) {
+        setMessage('Registration successful! Please check your email for confirmation instructions.');
+      } else if (data.session === null && data.user) {
+        setMessage('Registration successful! A confirmation email has been sent to your inbox.');
+      } else {
+        setMessage('Welcome aboard! You are now signed in.');
+        setTimeout(() => router.push('/dummy'), 1500);
+      }
+    } catch (error) {
       setMessage(`Registration failed: ${error.message}`);
       console.error('Registration error:', error);
-    } else {
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setMessage('Registration successful, but email confirmation might be pending or disabled.');
-      } else if (data.session === null && data.user) {
-        setMessage('Registration successful! Please check your email to confirm your account.');
-      } else {
-        setMessage('Registration successful! You might be automatically logged in.');
-        console.log('Registration successful:', data);
-        // Optionally redirect if auto-logged in
-        // router.push('/dashboard');
-      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-      <div className="max-w-md w-full space-y-8 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <div className="max-w-md w-full space-y-8 bg-white/90 dark:bg-gray-800/95 backdrop-blur-xl p-10 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700/50 transform transition-all duration-300 hover:shadow-2xl">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8 text-indigo-600 dark:text-indigo-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+          <div className="mx-auto h-16 w-16 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-2xl mb-4 shadow-md">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="w-8 h-8 text-indigo-600 dark:text-indigo-400"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-              />
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="19" y1="8" x2="19" y2="14"></line>
+              <line x1="16" y1="11" x2="22" y2="11"></line>
             </svg>
           </div>
           <h2 className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
@@ -68,16 +74,17 @@ export default function Register() {
             Already have an account?{' '}
             <a
               href="/login"
-              className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+              className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors duration-200 relative group"
             >
               Sign in
+              <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 transition-all duration-200 group-hover:w-full"></span>
             </a>
           </p>
         </div>
         
         <form onSubmit={handleRegister} className="mt-8 space-y-6">
           <div className="space-y-4">
-            <div>
+            <div className="relative">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email address
               </label>
@@ -88,13 +95,13 @@ export default function Register() {
                 autoComplete="email"
                 required
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 transition-all duration-200"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 transition-all duration-200 outline-none"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
@@ -106,7 +113,7 @@ export default function Register() {
                 required
                 minLength={6}
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 transition-all duration-200"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 transition-all duration-200 outline-none"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -121,16 +128,16 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
+              className={`w-full flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] ${
                 loading
                   ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/20'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-indigo-500/20'
               }`}
             >
               {loading ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -158,18 +165,41 @@ export default function Register() {
           </div>
 
           {message && (
-            <div className={`rounded-lg p-4 ${
+            <div className={`rounded-lg p-4 animate-fade-in ${
               message.includes('failed') 
                 ? 'bg-red-50 dark:bg-red-900/20' 
-                : 'bg-blue-50 dark:bg-blue-900/20'
+                : message.includes('Welcome') || message.includes('signed')
+                  ? 'bg-green-50 dark:bg-green-900/20'
+                  : 'bg-blue-50 dark:bg-blue-900/20'
             }`}>
-              <p className={`text-sm text-center ${
-                message.includes('failed') 
-                  ? 'text-red-600 dark:text-red-400' 
-                  : 'text-blue-600 dark:text-blue-400'
-              }`}>
-                {message}
-              </p>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  {message.includes('failed') ? (
+                    <svg className="h-5 w-5 text-red-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  ) : message.includes('Welcome') || message.includes('signed') ? (
+                    <svg className="h-5 w-5 text-green-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-blue-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <p className={`text-sm font-medium ${
+                    message.includes('failed') 
+                      ? 'text-red-600 dark:text-red-400' 
+                      : message.includes('Welcome') || message.includes('signed')
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-blue-600 dark:text-blue-400'
+                  }`} role="alert">
+                    {message}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </form>

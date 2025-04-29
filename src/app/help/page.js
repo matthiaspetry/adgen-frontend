@@ -1,10 +1,10 @@
-import Profile from '@/components/Main/Profile';
+import Help from '@/components/Main/Help';
 import WorkspaceLayout from '@/components/Layout/WorkspaceLayout';
 
-export default function ProfilePage() {
+export default function HelpPage() {
   return (
     <WorkspaceLayout>
-      <Profile />
+      <Help />
     </WorkspaceLayout>
   );
 }
